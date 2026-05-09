@@ -1,4 +1,4 @@
-# Patient Booking — Take-home Project
+# Patient Booking form
 
 A simple patient appointment booking flow with a clinic admin view, built as a take-home for Vero. The goal was to demonstrate product judgment, code quality, UX, and reliability on a realistic clinical-workflow problem within a tight timebox.
 
