@@ -1,0 +1,64 @@
+// Prisma schema for the patient booking system.
+//
+// Design notes:
+// - Slots are pre-generated per physician for the next two weeks (see seed.ts).
+//   This makes "available times" trivially queryable (slot has no active booking).
+// - Booking.status uses a string enum since SQLite doesn't support native enums.
+//   We constrain it at the application layer (see lib/types.ts).
+// - We do NOT put a unique constraint on Booking.slotId because cancelled
+//   bookings should release the slot. Conflict prevention happens in a
+//   transaction inside actions/bookings.ts. Production would use a partial
+//   unique index ("slotId where status != CANCELLED") on Postgres.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Physician {
+  id        String   @id @default(cuid())
+  name      String
+  specialty String
+  bio       String
+  createdAt DateTime @default(now())
+
+  slots    Slot[]
+  bookings Booking[]
+}
+
+model Slot {
+  id          String   @id @default(cuid())
+  physicianId String
+  startTime   DateTime
+  endTime     DateTime
+  createdAt   DateTime @default(now())
+
+  physician Physician @relation(fields: [physicianId], references: [id], onDelete: Cascade)
+  bookings  Booking[]
+
+  @@index([physicianId, startTime])
+}
+
+model Booking {
+  id             String   @id @default(cuid())
+  physicianId    String
+  slotId         String
+  patientName    String
+  patientDob     String // ISO date string (YYYY-MM-DD), kept as string to avoid TZ confusion
+  patientEmail   String
+  patientPhone   String
+  reasonForVisit String
+  status         String   @default("PENDING") // PENDING | CONFIRMED | CANCELLED
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  physician Physician @relation(fields: [physicianId], references: [id])
+  slot      Slot      @relation(fields: [slotId], references: [id])
+
+  @@index([physicianId, status])
+  @@index([slotId, status])
+}

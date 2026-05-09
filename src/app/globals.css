@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-cream-100 text-ink-300 font-sans;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  /* Subtle paper-grain background */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+    background-image: radial-gradient(
+        circle at 20% 30%,
+        rgba(44, 74, 71, 0.025) 0,
+        transparent 40%
+      ),
+      radial-gradient(
+        circle at 80% 70%,
+        rgba(183, 137, 76, 0.03) 0,
+        transparent 40%
+      );
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display tracking-tight;
+    font-feature-settings: "ss01";
+  }
+
+  /* Improve native date input feel in cream theme */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0.5;
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  .surface {
+    @apply rounded-lg border border-stone-border bg-cream-50;
+  }
+
+  .surface-muted {
+    @apply rounded-lg border border-stone-border bg-cream-200/40;
+  }
+
+  .stepper-line {
+    @apply h-px flex-1 bg-stone-border;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
