@@ -2,8 +2,18 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import {
+  UserRound,
+  Clock,
+  PencilLine,
+  Check,
+  Users,
+  CalendarOff,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea, Label, FieldError } from "@/components/ui/field";
+import { PhysicianAvatar } from "@/components/avatar";
 import { cn, formatDateLong, formatDateDow, formatTime, dayKey } from "@/lib/utils";
 import {
   patientDetailsSchema,
@@ -34,6 +44,13 @@ const STEP_LABELS: Record<Step, string> = {
   2: "Time",
   3: "Your details",
   4: "Review",
+};
+
+const STEP_ICONS: Record<Step, LucideIcon> = {
+  1: UserRound,
+  2: Clock,
+  3: PencilLine,
+  4: Check,
 };
 
 export function BookingFlow({ physicians }: { physicians: Physician[] }) {
@@ -171,48 +188,50 @@ export function BookingFlow({ physicians }: { physicians: Physician[] }) {
         </div>
       )}
 
-      {step === 1 && (
-        <StepPhysician
-          physicians={physicians}
-          selectedId={selectedPhysician?.id}
-          onPick={handlePickPhysician}
-        />
-      )}
+      <div key={step} className="step-fade">
+        {step === 1 && (
+          <StepPhysician
+            physicians={physicians}
+            selectedId={selectedPhysician?.id}
+            onPick={handlePickPhysician}
+          />
+        )}
 
-      {step === 2 && selectedPhysician && (
-        <StepSlot
-          physician={selectedPhysician}
-          slots={slots}
-          loading={slotsLoading}
-          selectedId={selectedSlot?.id}
-          onPick={handlePickSlot}
-          onBack={() => goTo(1)}
-        />
-      )}
+        {step === 2 && selectedPhysician && (
+          <StepSlot
+            physician={selectedPhysician}
+            slots={slots}
+            loading={slotsLoading}
+            selectedId={selectedSlot?.id}
+            onPick={handlePickSlot}
+            onBack={() => goTo(1)}
+          />
+        )}
 
-      {step === 3 && (
-        <StepDetails
-          details={details}
-          errors={errors}
-          onChange={setDetails}
-          onSubmit={handleSubmitDetails}
-          onBack={() => goTo(2)}
-        />
-      )}
+        {step === 3 && (
+          <StepDetails
+            details={details}
+            errors={errors}
+            onChange={setDetails}
+            onSubmit={handleSubmitDetails}
+            onBack={() => goTo(2)}
+          />
+        )}
 
-      {step === 4 && selectedPhysician && selectedSlot && (
-        <StepReview
-          physician={selectedPhysician}
-          slot={selectedSlot}
-          details={details}
-          submitting={submitting}
-          onConfirm={handleConfirm}
-          onBack={() => goTo(3)}
-          onEditPhysician={() => goTo(1)}
-          onEditSlot={() => goTo(2)}
-          onEditDetails={() => goTo(3)}
-        />
-      )}
+        {step === 4 && selectedPhysician && selectedSlot && (
+          <StepReview
+            physician={selectedPhysician}
+            slot={selectedSlot}
+            details={details}
+            submitting={submitting}
+            onConfirm={handleConfirm}
+            onBack={() => goTo(3)}
+            onEditPhysician={() => goTo(1)}
+            onEditSlot={() => goTo(2)}
+            onEditDetails={() => goTo(3)}
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -231,6 +250,7 @@ function Stepper({
       {([1, 2, 3, 4] as Step[]).map((n, i) => {
         const active = n === current;
         const done = n < current;
+        const StepIcon = STEP_ICONS[n];
         return (
           <React.Fragment key={n}>
             <li className="flex items-center gap-2.5">
@@ -238,8 +258,10 @@ function Stepper({
                 type="button"
                 disabled={!done}
                 onClick={() => onJumpBack(n)}
+                aria-current={active ? "step" : undefined}
+                aria-label={`${STEP_LABELS[n]}${done ? " (completed)" : active ? " (current)" : ""}`}
                 className={cn(
-                  "flex h-7 w-7 items-center justify-center rounded-full border font-mono text-[12px] transition-colors",
+                  "flex h-8 w-8 items-center justify-center rounded-full border transition-colors",
                   active &&
                     "border-forest-400 bg-forest-400 text-cream-50",
                   done &&
@@ -249,7 +271,11 @@ function Stepper({
                     "border-stone-border bg-cream-50 text-stone-muted",
                 )}
               >
-                {done ? "✓" : n}
+                {done ? (
+                  <Check key="done" size={15} strokeWidth={2.5} className="check-pop" />
+                ) : (
+                  <StepIcon size={15} strokeWidth={2} />
+                )}
               </button>
               <span
                 className={cn(
@@ -288,6 +314,7 @@ function StepPhysician({
 
       {physicians.length === 0 ? (
         <EmptyState
+          icon={Users}
           title="No clinicians available"
           body="Please check back soon."
         />
@@ -300,31 +327,37 @@ function StepPhysician({
                 key={p.id}
                 type="button"
                 onClick={() => onPick(p)}
+                aria-pressed={active}
                 className={cn(
                   "group surface text-left p-6 transition-all",
                   "hover:border-forest-300 hover:bg-cream-50",
                   active && "border-forest-400 ring-2 ring-forest-400/20",
                 )}
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-[12px] uppercase tracking-[0.16em] text-forest-300">
-                      {p.specialty}
+                <div className="flex items-start gap-4">
+                  <PhysicianAvatar name={p.name} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-[12px] uppercase tracking-[0.16em] text-forest-300">
+                          {p.specialty}
+                        </p>
+                        <h3 className="mt-1.5 font-display text-2xl text-ink-300">
+                          {p.name}
+                        </h3>
+                      </div>
+                      <span
+                        aria-hidden
+                        className="shrink-0 text-stone-muted transition-transform group-hover:translate-x-0.5 group-hover:text-forest-300"
+                      >
+                        →
+                      </span>
+                    </div>
+                    <p className="mt-3 text-[14px] leading-relaxed text-ink-100">
+                      {p.bio}
                     </p>
-                    <h3 className="mt-2 font-display text-2xl text-ink-300">
-                      {p.name}
-                    </h3>
                   </div>
-                  <span
-                    aria-hidden
-                    className="text-stone-muted transition-transform group-hover:translate-x-0.5 group-hover:text-forest-300"
-                  >
-                    →
-                  </span>
                 </div>
-                <p className="mt-3 text-[14px] leading-relaxed text-ink-100">
-                  {p.bio}
-                </p>
               </button>
             );
           })}
@@ -397,6 +430,7 @@ function StepSlot({
         </div>
       ) : grouped.length === 0 ? (
         <EmptyState
+          icon={CalendarOff}
           title="No availability in the next two weeks"
           body="This clinician's schedule is fully booked. Try another clinician."
           action={
@@ -425,11 +459,13 @@ function StepSlot({
                       key={s.id}
                       type="button"
                       onClick={() => onPick(s)}
+                      aria-pressed={active}
                       className={cn(
-                        "h-10 rounded border text-[14px] font-medium tabular-nums transition-colors",
+                        "h-10 rounded border text-[14px] font-medium tabular-nums",
+                        "transition-[transform,colors,box-shadow] duration-150 ease-out",
                         active
-                          ? "border-forest-400 bg-forest-400 text-cream-50"
-                          : "border-stone-border bg-cream-50 text-ink-200 hover:border-forest-300 hover:bg-cream-200",
+                          ? "border-forest-400 bg-forest-400 text-cream-50 scale-[1.02]"
+                          : "border-stone-border bg-cream-50 text-ink-200 hover:border-forest-300 hover:bg-cream-200 hover:scale-[1.03] active:scale-[0.97]",
                       )}
                     >
                       {formatTime(s.startTime)}
@@ -672,16 +708,23 @@ function ReviewRow({
 // ---------- Empty state ----------
 
 function EmptyState({
+  icon: Icon,
   title,
   body,
   action,
 }: {
+  icon?: LucideIcon;
   title: string;
   body: string;
   action?: React.ReactNode;
 }) {
   return (
     <div className="mt-10 surface-muted px-8 py-12 text-center">
+      {Icon && (
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-cream-50 text-forest-300">
+          <Icon size={22} strokeWidth={1.75} />
+        </div>
+      )}
       <h3 className="font-display text-2xl text-ink-300">{title}</h3>
       <p className="mt-2 text-[15px] text-ink-100">{body}</p>
       {action && <div className="mt-6 flex justify-center">{action}</div>}

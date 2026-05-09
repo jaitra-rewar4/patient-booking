@@ -66,3 +66,62 @@
     text-wrap: balance;
   }
 }
+
+/* ---------- Motion ---------- */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes overlayOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes dialogIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes dialogOut {
+  from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(24px); }
+}
+@keyframes scaleInBounce {
+  0% { opacity: 0; transform: scale(0.4); }
+  70% { opacity: 1; transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+@keyframes stepFade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes checkPop {
+  0% { opacity: 0; transform: scale(0.4); }
+  60% { opacity: 1; transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.dlg-overlay[data-state="open"] { animation: overlayIn 160ms ease-out; }
+.dlg-overlay[data-state="closed"] { animation: overlayOut 120ms ease-in; }
+.dlg-content[data-state="open"] { animation: dialogIn 200ms cubic-bezier(0.16, 1, 0.3, 1); }
+.dlg-content[data-state="closed"] { animation: dialogOut 140ms ease-in; }
+.toast-root[data-state="open"] { animation: toastIn 220ms cubic-bezier(0.16, 1, 0.3, 1); }
+.toast-root[data-state="closed"] { animation: toastOut 140ms ease-in; }
+.success-pop { animation: scaleInBounce 480ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.step-fade { animation: stepFade 220ms ease-out both; }
+.check-pop { animation: checkPop 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { DemoBanner } from "@/components/demo-banner";
 import { AdminTable } from "@/components/admin-table";
 import { getBookings } from "@/actions/bookings";
+import { signOutAction } from "@/actions/auth";
 
 export default async function AdminPage() {
   const bookings = await getBookings();
@@ -19,12 +20,22 @@ export default async function AdminPage() {
               Demo · Clinic admin
             </span>
           </Link>
-          <Link
-            href="/book"
-            className="text-[13px] text-stone-muted hover:text-ink-200"
-          >
-            ← Patient view
-          </Link>
+          <div className="flex items-center gap-5">
+            <Link
+              href="/book"
+              className="text-[13px] text-stone-muted hover:text-ink-200"
+            >
+              ← Patient view
+            </Link>
+            <form action={signOutAction}>
+              <button
+                type="submit"
+                className="text-[13px] text-stone-muted hover:text-ink-200"
+              >
+                Sign out
+              </button>
+            </form>
+          </div>
         </div>
       </header>
 

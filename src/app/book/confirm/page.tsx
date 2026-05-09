@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Check } from "lucide-react";
 import { DemoBanner } from "@/components/demo-banner";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { EmailPreview } from "@/components/email-preview";
 import { getBookingById } from "@/actions/bookings";
 import {
   formatDateLong,
@@ -38,19 +40,8 @@ export default async function ConfirmPage({
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-12 md:py-20">
         <div className="text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-forest-50 text-forest-400">
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M20 6L9 17l-5-5" />
-            </svg>
+          <div className="success-pop mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-forest-50 text-forest-400">
+            <Check size={28} strokeWidth={2.5} />
           </div>
           <p className="mt-6 text-[12px] uppercase tracking-[0.2em] text-forest-300">
             Request received
@@ -139,6 +130,33 @@ export default async function ConfirmPage({
             Book another appointment
           </Link>
         </div>
+
+        {/* Email preview */}
+        <section className="mt-16">
+          <div className="mb-4 flex flex-col items-baseline gap-1 sm:flex-row sm:gap-3">
+            <h2 className="font-display text-xl tracking-tight text-ink-300">
+              Email preview
+            </h2>
+            <p className="text-[13px] text-stone-muted">
+              This is what would be sent to your inbox in production.
+            </p>
+          </div>
+          <div className="rounded-lg border border-stone-border bg-cream-200/40 p-4 sm:p-6 shadow-[0_1px_0_0_rgba(0,0,0,0.03)]">
+            <EmailPreview
+              patientName={booking.patientName}
+              patientEmail={booking.patientEmail}
+              physician={{
+                name: booking.physician.name,
+                specialty: booking.physician.specialty,
+              }}
+              slot={{
+                startTime: booking.slot.startTime,
+                endTime: booking.slot.endTime,
+              }}
+              bookingId={booking.id}
+            />
+          </div>
+        </section>
       </main>
     </>
   );
