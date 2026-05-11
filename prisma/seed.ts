@@ -1,6 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { makePrismaClient } from "../src/lib/prisma-client";
 
-const prisma = new PrismaClient();
+const prisma = makePrismaClient();
 
 const PHYSICIANS = [
   {

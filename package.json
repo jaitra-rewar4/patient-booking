@@ -10,10 +10,12 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma db push --force-reset && npm run db:seed",
-    "postinstall": "prisma generate && prisma db push --skip-generate --accept-data-loss && tsx prisma/seed.ts"
+    "postinstall": "node scripts/postinstall.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
+    "@libsql/client": "^0.8.1",
+    "@prisma/adapter-libsql": "^5.22.0",
     "@prisma/client": "^5.22.0",
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-label": "^2.1.0",
