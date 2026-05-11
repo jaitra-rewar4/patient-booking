@@ -12,13 +12,30 @@ import { revalidatePath } from "next/cache";
 
 // ---------- Read ----------
 
+// Ordering: actionable first. PENDING needs the clinic's attention,
+// CONFIRMED is informational, CANCELLED is historical. Prisma 5 can't
+// express a non-alphabetical enum priority in `orderBy` without raw SQL,
+// so we fetch newest-first per status and resort in memory — the bookings
+// list is small enough that this is free.
+const STATUS_PRIORITY: Record<string, number> = {
+  PENDING: 0,
+  CONFIRMED: 1,
+  CANCELLED: 2,
+};
+
 export async function getBookings() {
-  return db.booking.findMany({
+  const bookings = await db.booking.findMany({
     include: {
       physician: { select: { id: true, name: true, specialty: true } },
       slot: { select: { id: true, startTime: true, endTime: true } },
     },
-    orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+    orderBy: { createdAt: "desc" },
+  });
+  return bookings.sort((a, b) => {
+    const pa = STATUS_PRIORITY[a.status] ?? 99;
+    const pb = STATUS_PRIORITY[b.status] ?? 99;
+    if (pa !== pb) return pa - pb;
+    return b.createdAt.getTime() - a.createdAt.getTime();
   });
 }
 
