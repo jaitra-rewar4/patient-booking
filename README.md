@@ -1,8 +1,16 @@
 # Apex Health — Patient Booking
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/jaitra-rewar4/patient-booking)
+
 A simple patient appointment booking flow with a clinic admin view, built as a take-home for Vero. The goal was to demonstrate product judgment, code quality, UX, and reliability on a realistic clinical-workflow problem within a tight timebox.
 
 ## Quick start
+
+### Open in your browser (no install)
+
+Click the **Open in GitHub Codespaces** badge above. GitHub spins up a Linux VM in your browser, installs dependencies (~30s), and auto-opens the running app on port 3000. The badge does everything end-to-end — `prisma generate`, `db push`, seed, `npm run dev` — via the `.devcontainer` config in this repo. You need a GitHub account; the free Codespaces tier (60 hours/month) is plenty for review.
+
+### Run locally
 
 Requires Node.js 20+.
 
@@ -45,35 +53,46 @@ After submitting, patients land on a confirmation page that animates a check-in 
 
 ```mermaid
 erDiagram
-    Physician ||--o{ Slot : has
-    Physician ||--o{ Booking : has
-    Slot ||--o{ Booking : has
+    Physician ||--o{ Slot : "schedules"
+    Physician ||--o{ Booking : "owns"
+    Slot ||--o{ Booking : "fills"
+
     Physician {
-        string id PK
+        string id PK "cuid"
         string name
         string specialty
         string bio
+        datetime createdAt
     }
     Slot {
-        string id PK
+        string id PK "cuid"
         string physicianId FK
         datetime startTime
         datetime endTime
+        datetime createdAt
     }
     Booking {
-        string id PK
+        string id PK "cuid"
         string physicianId FK
         string slotId FK
         string patientName
-        string patientDob
+        string patientDob "ISO date (YYYY-MM-DD)"
         string patientEmail
         string patientPhone
         string reasonForVisit
-        string status "PENDING|CONFIRMED|CANCELLED"
+        string status "PENDING | CONFIRMED | CANCELLED"
+        datetime createdAt
+        datetime updatedAt
     }
 ```
 
-Slots are pre-generated per physician (weekdays, 9 AM – 5 PM, 30-min intervals, lunch hour skipped, two weeks ahead). Availability is derived: a slot is "available" if it has no active (PENDING or CONFIRMED) booking. Cancelling a booking releases the slot, which is the behavior I'd expect in a real clinic workflow.
+**Indexes** — `Slot(physicianId, startTime)` for fast availability lookups; `Booking(physicianId, status)` and `Booking(slotId, status)` for the admin filters and the slot-conflict re-check inside `createBooking`.
+
+**Invariant** — a Slot can have many historical Bookings (cancelled ones), but at most one in `PENDING` or `CONFIRMED` at a time. The state machine plus the transactional re-check in `createBooking` enforce this in code; in Postgres I'd back it up with a partial unique index `ON Booking(slotId) WHERE status != 'CANCELLED'`.
+
+**Generation** — slots are pre-seeded per physician (weekdays, 9 AM – 5 PM, 30-min intervals, lunch hour skipped, two weeks ahead). Availability is derived: a slot is "available" if it starts in the future and has no `PENDING` or `CONFIRMED` booking. Cancelling a booking releases the slot.
+
+**Why dates as ISO strings for DOB** — date-only fields (birthdays) shouldn't carry a timezone. Storing as `"1992-11-08"` avoids the off-by-one-day bugs you get when a `DateTime` in UTC renders as the previous day in a negative-offset timezone.
 
 ## Key technical & product decisions
 
