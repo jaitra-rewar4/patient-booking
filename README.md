@@ -8,7 +8,7 @@ A simple patient appointment booking flow with a clinic admin view, built as a t
 
 ### Open in your browser (no install)
 
-Click the **Open in GitHub Codespaces** badge above. GitHub spins up a Linux VM in your browser, installs dependencies (~30s), and auto-opens the running app on port 3000. The badge does everything end-to-end — `prisma generate`, `db push`, seed, `npm run dev` — via the `.devcontainer` config in this repo. You need a GitHub account; the free Codespaces tier (60 hours/month) is plenty for review.
+Click the **Open in GitHub Codespaces** badge above. GitHub spins up a Linux VM in your browser, installs dependencies (~30s), and auto-opens the running app on port 3000. The badge does everything end-to-end — `prisma generate`, `db push`, seed, `npm run dev` — via the `.devcontainer` config in this repo. You need a GitHub account; the free Codespaces tier gives 60 hours/month.
 
 ### Run locally
 
