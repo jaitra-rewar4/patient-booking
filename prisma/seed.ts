@@ -6,22 +6,22 @@ const PHYSICIANS = [
   {
     name: "Dr. Amelia Chen",
     specialty: "Family Medicine",
-    bio: "Primary care physician with 12 years of experience. Special interest in preventive medicine and chronic disease management.",
+    bio: "Primary care physician with 12 years of experience. Special interest in preventive medicine and chronic disease management. Speaks English, Mandarin, and Cantonese.",
   },
   {
     name: "Dr. Marcus Okafor",
     specialty: "Internal Medicine",
-    bio: "Internist focused on adult primary care, complex multi-system conditions, and post-discharge follow-up.",
+    bio: "Internist focused on adult primary care, complex multi-system conditions, and post-discharge follow-up. Speaks English, French, and Igbo.",
   },
   {
     name: "Dr. Priya Raman",
     specialty: "Pediatrics",
-    bio: "Pediatrician serving newborns through adolescents. Areas of focus include developmental screening and asthma care.",
+    bio: "Pediatrician serving newborns through adolescents. Areas of focus include developmental screening and asthma care. Speaks English, Tamil, Hindi, and Punjabi.",
   },
   {
     name: "Dr. Joel Lindqvist",
     specialty: "Dermatology",
-    bio: "Board-certified dermatologist offering skin checks, acne care, eczema management, and minor procedures.",
+    bio: "Board-certified dermatologist offering skin checks, acne care, eczema management, and minor procedures. Speaks English and Swedish.",
   },
 ];
 

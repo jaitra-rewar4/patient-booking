@@ -22,9 +22,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Patient Booking · Demo",
+  title: "Apex Health · Patient Booking",
   description:
-    "A simple patient booking flow demonstrating clinical workflow design.",
+    "A patient booking flow demonstrating clinical workflow design.",
 };
 
 export default function RootLayout({
