@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { Lock } from "lucide-react";
 import { DemoBanner } from "@/components/demo-banner";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Input, Label, FieldError } from "@/components/ui/field";
 import { SESSION_COOKIE, SESSION_TTL_MS, signSession } from "@/lib/auth";
 
@@ -96,9 +96,9 @@ export default async function AdminLoginPage({
               )}
             </div>
 
-            <Button type="submit" className="w-full" size="lg">
+            <SubmitButton className="w-full" size="lg" pendingLabel="Signing in…">
               Sign in
-            </Button>
+            </SubmitButton>
           </form>
 
           <p className="mt-6 text-[12px] leading-relaxed text-stone-muted">

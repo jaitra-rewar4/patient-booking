@@ -115,6 +115,16 @@
   60% { opacity: 1; transform: scale(1.15); }
   100% { transform: scale(1); }
 }
+@keyframes wordReveal {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.word-reveal > span {
+  display: inline-block;
+  opacity: 0;
+  animation: wordReveal 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
 
 .dlg-overlay[data-state="open"] { animation: overlayIn 160ms ease-out; }
 .dlg-overlay[data-state="closed"] { animation: overlayOut 120ms ease-in; }

@@ -9,6 +9,7 @@ import {
   Check,
   Users,
   CalendarOff,
+  Loader2,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -672,7 +673,14 @@ function StepReview({
           Back
         </Button>
         <Button onClick={onConfirm} disabled={submitting} size="lg">
-          {submitting ? "Submitting…" : "Confirm booking"}
+          {submitting ? (
+            <>
+              <Loader2 size={16} className="animate-spin" aria-hidden />
+              Submitting…
+            </>
+          ) : (
+            "Confirm booking"
+          )}
         </Button>
       </div>
     </div>

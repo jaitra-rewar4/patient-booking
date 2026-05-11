@@ -23,8 +23,15 @@ export default function HomePage() {
           <p className="text-[13px] uppercase tracking-[0.2em] text-forest-300">
             Patient portal
           </p>
-          <h1 className="mt-5 font-display text-5xl md:text-7xl leading-[0.95] tracking-tight text-balance text-ink-300">
-            Book a visit with a clinician you trust.
+          <h1 className="word-reveal mt-5 font-display text-5xl md:text-7xl leading-[0.95] tracking-tight text-balance text-ink-300">
+            {"Book a visit with a clinician you trust."
+              .split(" ")
+              .map((word, i, arr) => (
+                <span key={i} style={{ animationDelay: `${i * 70}ms` }}>
+                  {word}
+                  {i < arr.length - 1 ? " " : ""}
+                </span>
+              ))}
           </h1>
           <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-ink-100">
             Choose a physician, pick a time that works, and tell us what brings

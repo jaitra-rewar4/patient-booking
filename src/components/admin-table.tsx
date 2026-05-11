@@ -288,6 +288,7 @@ function StatCard({
   value: number;
   accent?: "pending" | "confirmed";
 }) {
+  const display = useCountUp(value, 600);
   return (
     <div className="surface px-4 py-3">
       <p className="text-[11px] uppercase tracking-[0.16em] text-stone-muted">
@@ -301,10 +302,35 @@ function StatCard({
           !accent && "text-ink-300",
         )}
       >
-        {value}
+        {display}
       </p>
     </div>
   );
+}
+
+function useCountUp(target: number, durationMs: number): number {
+  const [value, setValue] = React.useState(0);
+  const startRef = React.useRef<number | null>(null);
+  const fromRef = React.useRef(0);
+
+  React.useEffect(() => {
+    fromRef.current = value;
+    startRef.current = null;
+    let raf = 0;
+    const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+    const step = (now: number) => {
+      if (startRef.current === null) startRef.current = now;
+      const t = Math.min(1, (now - startRef.current) / durationMs);
+      const next = fromRef.current + (target - fromRef.current) * easeOut(t);
+      setValue(t < 1 ? next : target);
+      if (t < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target, durationMs]);
+
+  return Math.round(value);
 }
 
 function EmptyResult() {
