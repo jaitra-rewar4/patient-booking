@@ -39,9 +39,20 @@ export async function getBookings() {
   });
 }
 
-export async function getAvailableSlots(physicianId: string) {
+export type SerializedSlot = {
+  id: string;
+  startTime: string;
+  endTime: string;
+};
+
+export async function getAvailableSlots(
+  physicianId: string,
+): Promise<SerializedSlot[]> {
   // A slot is available if it has no active (PENDING or CONFIRMED) booking
-  // and starts in the future.
+  // and starts in the future. We return ISO strings rather than Date objects
+  // so the type matches what RSC actually sends over the wire — Dates get
+  // serialized to strings during the boundary crossing, and a lying type
+  // bites you the moment you try to call a Date method on the client.
   const now = new Date();
   const slots = await db.slot.findMany({
     where: {
@@ -51,7 +62,11 @@ export async function getAvailableSlots(physicianId: string) {
     },
     orderBy: { startTime: "asc" },
   });
-  return slots;
+  return slots.map((s) => ({
+    id: s.id,
+    startTime: s.startTime.toISOString(),
+    endTime: s.endTime.toISOString(),
+  }));
 }
 
 // ---------- Create ----------

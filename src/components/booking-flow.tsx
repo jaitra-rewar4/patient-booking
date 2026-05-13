@@ -23,6 +23,7 @@ import {
 import {
   createBooking,
   getAvailableSlots,
+  type SerializedSlot,
 } from "@/actions/bookings";
 
 type Physician = {
@@ -37,6 +38,16 @@ type Slot = {
   startTime: Date;
   endTime: Date;
 };
+
+// Server actions serialize Date to ISO string at the RSC boundary.
+// Hydrate them back into Date objects at the use site.
+function hydrateSlots(raw: SerializedSlot[]): Slot[] {
+  return raw.map((s) => ({
+    id: s.id,
+    startTime: new Date(s.startTime),
+    endTime: new Date(s.endTime),
+  }));
+}
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -79,17 +90,21 @@ export function BookingFlow({ physicians }: { physicians: Physician[] }) {
     if (!selectedPhysician) return;
     let cancelled = false;
     setSlotsLoading(true);
-    getAvailableSlots(selectedPhysician.id).then((data) => {
-      if (cancelled) return;
-      setSlots(
-        data.map((s: { id: string; startTime: Date; endTime: Date }) => ({
-          ...s,
-          startTime: new Date(s.startTime),
-          endTime: new Date(s.endTime),
-        })),
-      );
-      setSlotsLoading(false);
-    });
+    getAvailableSlots(selectedPhysician.id)
+      .then((data) => {
+        if (cancelled) return;
+        setSlots(hydrateSlots(data));
+        setSlotsLoading(false);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error("Failed to load slots", err);
+        setSlots([]);
+        setSlotsLoading(false);
+        setTopLevelError(
+          "We couldn't load available times. Please pick a different clinician or refresh the page.",
+        );
+      });
     return () => {
       cancelled = true;
     };
@@ -160,15 +175,15 @@ export function BookingFlow({ physicians }: { physicians: Physician[] }) {
       // re-fetch
       if (selectedPhysician) {
         setSlotsLoading(true);
-        const fresh = await getAvailableSlots(selectedPhysician.id);
-        setSlots(
-          fresh.map((s: { id: string; startTime: Date; endTime: Date }) => ({
-            ...s,
-            startTime: new Date(s.startTime),
-            endTime: new Date(s.endTime),
-          })),
-        );
-        setSlotsLoading(false);
+        try {
+          const fresh = await getAvailableSlots(selectedPhysician.id);
+          setSlots(hydrateSlots(fresh));
+        } catch (e) {
+          console.error("Failed to refresh slots after conflict", e);
+          setSlots([]);
+        } finally {
+          setSlotsLoading(false);
+        }
       }
     } else if (result.error === "VALIDATION") {
       setErrors(result.issues);
