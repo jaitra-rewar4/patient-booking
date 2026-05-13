@@ -5,6 +5,11 @@ import { AdminTable } from "@/components/admin-table";
 import { getBookings } from "@/actions/bookings";
 import { signOutAction } from "@/actions/auth";
 
+// Bookings change on every request (new submissions, status updates).
+// Force dynamic rendering so the page always reads fresh data from the
+// DB instead of serving a build-time snapshot.
+export const dynamic = "force-dynamic";
+
 export default async function AdminPage() {
   const bookings = await getBookings();
 
