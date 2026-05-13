@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Check } from "lucide-react";
 import { DemoBanner } from "@/components/demo-banner";
+import { Logo } from "@/components/logo";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { EmailPreview } from "@/components/email-preview";
 import { getBookingById } from "@/actions/bookings";
@@ -27,13 +28,8 @@ export default async function ConfirmPage({
       <DemoBanner />
       <header className="border-b border-stone-border bg-cream-50/50">
         <div className="mx-auto max-w-3xl px-6 py-4">
-          <Link href="/" className="flex items-baseline gap-2">
-            <span className="font-display text-[20px] tracking-tight text-ink-300">
-              Apex Health
-            </span>
-            <span className="text-[11px] uppercase tracking-[0.18em] text-stone-muted">
-              Demo
-            </span>
+          <Link href="/" aria-label="Apex Health home">
+            <Logo size={26} subtitle="Demo" />
           </Link>
         </div>
       </header>

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { Lock } from "lucide-react";
 import { DemoBanner } from "@/components/demo-banner";
+import { Logo } from "@/components/logo";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Input, Label, FieldError } from "@/components/ui/field";
 import { SESSION_COOKIE, SESSION_TTL_MS, signSession } from "@/lib/auth";
@@ -51,15 +52,10 @@ export default async function AdminLoginPage({
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-6 py-16 md:py-24">
         <Link
           href="/"
-          className="flex items-baseline gap-2 self-center"
+          className="self-center"
           aria-label="Apex Health home"
         >
-          <span className="font-display text-[20px] tracking-tight text-ink-300">
-            Apex Health
-          </span>
-          <span className="text-[11px] uppercase tracking-[0.18em] text-stone-muted">
-            Demo
-          </span>
+          <Logo size={28} subtitle="Demo" />
         </Link>
 
         <div className="mt-10 surface px-7 py-8">

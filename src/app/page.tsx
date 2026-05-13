@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { DemoBanner } from "@/components/demo-banner";
+import { Logo } from "@/components/logo";
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
@@ -21,13 +22,8 @@ export default function HomePage() {
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 pb-12 pt-6 md:pt-10">
         {/* Header */}
         <header className="flex items-center justify-between">
-          <Link href="/" className="flex items-baseline gap-2">
-            <span className="font-display text-[22px] tracking-tight text-ink-300">
-              Apex Health
-            </span>
-            <span className="text-[11px] uppercase tracking-[0.18em] text-stone-muted">
-              Demo
-            </span>
+          <Link href="/" aria-label="Apex Health home">
+            <Logo subtitle="Demo" />
           </Link>
           <Link
             href="/book"

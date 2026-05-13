@@ -1,4 +1,5 @@
 import { formatDateLong, formatTime } from "@/lib/utils";
+import { LogoMark } from "@/components/logo";
 
 type EmailPreviewProps = {
   patientName: string;
@@ -22,13 +23,16 @@ export function EmailPreview({
   return (
     <div className="mx-auto w-full max-w-[520px] overflow-hidden rounded-lg border border-stone-border bg-white">
       {/* Branded header */}
-      <div className="bg-forest-400 px-6 py-5">
-        <p className="font-display text-[20px] tracking-tight text-cream-50">
-          Apex Health
-        </p>
-        <p className="mt-0.5 text-[11px] uppercase tracking-[0.2em] text-cream-50/70">
-          Appointment request received
-        </p>
+      <div className="flex items-center gap-3 bg-forest-400 px-6 py-5">
+        <LogoMark size={40} variant="light" />
+        <div>
+          <p className="font-display text-[20px] tracking-tight text-cream-50">
+            Apex Health
+          </p>
+          <p className="mt-0.5 text-[11px] uppercase tracking-[0.2em] text-cream-50/70">
+            Appointment request received
+          </p>
+        </div>
       </div>
 
       <div className="px-6 py-7">
