@@ -21,6 +21,7 @@ import {
   formatDateLong,
   formatTime,
   formatDateShort,
+  formatDob,
 } from "@/lib/utils";
 import { updateBookingStatus } from "@/actions/bookings";
 import {
@@ -434,7 +435,7 @@ function BookingDialogContent({
         <div className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
           <DetailField label="Email" value={b.patientEmail} />
           <DetailField label="Phone" value={b.patientPhone} />
-          <DetailField label="Date of birth" value={b.patientDob} />
+          <DetailField label="Date of birth" value={formatDob(b.patientDob)} />
           <DetailField label="Booked at" value={formatDateLong(b.createdAt)} />
           <DetailField
             label="Appointment"
@@ -525,7 +526,7 @@ function BookingCard({
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-medium text-ink-300">{b.patientName}</p>
-          <p className="text-[12px] text-stone-muted">DOB {b.patientDob}</p>
+          <p className="text-[12px] text-stone-muted">DOB {formatDob(b.patientDob)}</p>
         </div>
         <StatusBadge status={status} />
       </div>

@@ -15,7 +15,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input, Textarea, Label, FieldError } from "@/components/ui/field";
 import { PhysicianAvatar } from "@/components/avatar";
-import { cn, formatDateLong, formatDateDow, formatTime, dayKey } from "@/lib/utils";
+import {
+  cn,
+  formatDateLong,
+  formatDateDow,
+  formatTime,
+  dayKey,
+  formatDob,
+} from "@/lib/utils";
 import {
   patientDetailsSchema,
   type PatientDetails,
@@ -530,6 +537,8 @@ function StepDetails({
           <Input
             id="patientName"
             autoComplete="name"
+            placeholder="Jane Smith"
+            maxLength={100}
             value={details.patientName}
             onChange={(e) =>
               onChange({ ...details, patientName: e.target.value })
@@ -549,6 +558,7 @@ function StepDetails({
               onChange({ ...details, patientDob: e.target.value })
             }
             aria-invalid={!!errors.patientDob}
+            min="1900-01-01"
             max={new Date().toISOString().split("T")[0]}
           />
           <FieldError>{errors.patientDob}</FieldError>
@@ -559,8 +569,10 @@ function StepDetails({
           <Input
             id="patientPhone"
             type="tel"
+            inputMode="tel"
             autoComplete="tel"
             placeholder="(555) 123-4567"
+            maxLength={30}
             value={details.patientPhone}
             onChange={(e) =>
               onChange({ ...details, patientPhone: e.target.value })
@@ -576,6 +588,9 @@ function StepDetails({
             id="patientEmail"
             type="email"
             autoComplete="email"
+            inputMode="email"
+            placeholder="you@example.com"
+            maxLength={254}
             value={details.patientEmail}
             onChange={(e) =>
               onChange({ ...details, patientEmail: e.target.value })
@@ -671,7 +686,7 @@ function StepReview({
         <ReviewRow label="Patient" onEdit={onEditDetails}>
           <p className="font-medium text-ink-300">{details.patientName}</p>
           <p className="text-[14px] text-ink-100">
-            DOB {details.patientDob} · {details.patientEmail} ·{" "}
+            DOB {formatDob(details.patientDob)} · {details.patientEmail} ·{" "}
             {details.patientPhone}
           </p>
         </ReviewRow>

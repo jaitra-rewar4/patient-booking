@@ -22,7 +22,11 @@ export const patientDetailsSchema = z.object({
       return `${yyyy}-${mm}-${dd}` === v;
     }, "Enter a valid date")
     .refine((v) => new Date(v) < new Date(), "Date of birth must be in the past"),
-  patientEmail: z.string().email("Enter a valid email address"),
+  patientEmail: z
+    .string()
+    .trim()
+    .max(254, "Email is too long")
+    .email("Enter a valid email address"),
   patientPhone: z
     .string()
     .trim()
@@ -41,6 +45,7 @@ export const patientDetailsSchema = z.object({
     ),
   reasonForVisit: z
     .string()
+    .trim()
     .min(5, "Please describe the reason for your visit (5+ characters)")
     .max(500, "Please keep this under 500 characters"),
 });
