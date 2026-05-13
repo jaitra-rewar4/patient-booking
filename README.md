@@ -133,6 +133,19 @@ In rough priority order:
 - **Observability.** Even a structured `console.log` with request IDs, plus a Sentry hookup for errors.
 - **Internationalization & timezone correctness.** All dates currently render in the browser's locale and timezone, which is fine for a single-clinic demo but breaks the moment you have a multi-region patient base.
 
+### Use cases the demo doesn't cover yet
+
+The five requirements in the brief land me at "patient picks a single appointment from open slots." Real clinical scheduling has more shape than that. The features I'd build next, roughly in the order I'd prioritise them:
+
+- **Recurring / series appointments.** Chronic-care follow-ups (physio, oncology, mental health) typically book in a series — weekly for N weeks, monthly for N months. One form, one click, one `seriesId` linking the resulting Bookings so cancelling/rescheduling can act on the whole series.
+- **Multiple appointment types and durations.** A new-patient intake is 60 min, a routine follow-up is 15 min, a procedure is 90 min. Slots become elastic: either each slot carries its own `durationMinutes` per appointment type, or a 60-min booking consumes two adjacent 30-min slots in one transaction. The patient picks the appointment type up front so the slot picker shows only viable times.
+- **Telehealth vs in-person.** Patient picks a modality. Telehealth bookings drop the address fields and include a join link (Zoom/Doxy.me) in the confirmation. Admin filters by modality. Physicians flag which modalities they offer per appointment type.
+- **Returning-patient entity.** Today every booking creates a fresh patient record. The real model has a `Patient` table keyed by email + phone (or full SSO identity once auth lands), linked to many Bookings. Second-visit form pre-fills, and the admin row can show "3rd visit this year" — useful context for clinic staff.
+- **Waitlist for fully-booked clinicians.** When a physician has no open slots, the patient opts onto a waitlist. On any cancellation, the system offers the freed slot to the first waitlisted patient with a 15-minute claim window before moving down the list.
+- **Pre-visit intake forms.** Reason-for-visit becomes the first field in a fuller, specialty-aware intake (allergies, current medications, symptom timeline). Pediatrics asks different questions than dermatology. The structured data feeds the clinician's pre-visit prep — and, in the Vero direction, becomes input for AI-assisted clinical-note generation downstream.
+- **Walk-in / urgent overlay.** Some clinics need a queue for same-day walk-ins running parallel to scheduled appointments. The admin sees both streams; the patient-facing flow doesn't change.
+- **Cancellation policy enforcement.** Late-cancel (under 24 hours) and no-show flags on bookings, with a per-clinic policy (warning, fee, account note). Important for clinic operations but lives entirely in admin land.
+
 ## A note on healthcare context
 
 Healthcare apps fail differently from consumer apps. A wrong date in a calendar app is a nuisance. A wrong date on a clinic appointment cascades into missed care, frustrated patients, and reschedule overhead. The PHI reminder on the reason-for-visit field, the demo banner that doesn't go away, the request-versus-confirmation distinction, and the server-side revalidation aren't anything novel. They're the defaults I wanted in place for an app in this domain.
