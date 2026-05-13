@@ -1,8 +1,10 @@
 # Apex Health — Patient Booking
 
+**Live demo:** https://patient-booking-jaitrarewar.vercel.app · admin password: `demo-admin-2026`
+
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/jaitra-rewar4/patient-booking)
 
-A simple patient appointment booking flow with a clinic admin view, built as a take-home for Vero. The goal was to demonstrate product judgment, code quality, UX, and reliability on a realistic clinical-workflow problem within a tight timebox.
+Apex Health is a patient booking app for a fictional clinic. Patients pick a clinician, choose an open time, enter their details, and submit. Clinic staff see the request in an admin panel and confirm or cancel from there. It's one Next.js app with a Prisma schema, SQLite locally, and Turso in production.
 
 ## Quick start
 
@@ -98,9 +100,9 @@ erDiagram
 
 **Stack: Next.js 15 (App Router) + TypeScript + Prisma + SQLite + Tailwind.** This keeps the entire app in one repo, runnable with `npm install && npm run dev` and zero infrastructure. SQLite means the grader doesn't need Docker, Postgres, or any environment setup. Server actions handle all mutations, which keeps the API surface tight and type-safe end-to-end.
 
-**Booking *request*, not booking.** A new booking starts in `PENDING`, not `CONFIRMED`. The patient confirmation page makes this distinction explicit ("your booking has been requested … the clinic will confirm shortly"). This matches how real clinics actually work and avoids overpromising to patients — a small product call that I think matters in healthcare.
+**Booking *request*, not booking.** A new booking starts in `PENDING`, not `CONFIRMED`. The patient confirmation page makes this distinction explicit ("your booking has been requested … the clinic will confirm shortly"). That's how clinics actually work, and it keeps the app from over-promising to a patient before staff have verified the slot.
 
-**Status as a state machine.** Transitions are defined in one place (`src/types/index.ts`): `PENDING → CONFIRMED|CANCELLED`, `CONFIRMED → CANCELLED`, `CANCELLED → ∅`. The admin UI hides actions that aren't valid from the current state, and the server action re-validates the transition before writing. Invalid states should be unrepresentable in both the UI and the data layer.
+**Status as a state machine.** Transitions are defined in one place (`src/types/index.ts`): `PENDING → CONFIRMED|CANCELLED`, `CONFIRMED → CANCELLED`, `CANCELLED → terminal`. The admin UI only shows the buttons for legal transitions. Even so, the server action revalidates before writing, so a client posting a bogus status change can't push the DB into a bad state.
 
 **Slot conflict handling.** Two patients can pick the same slot before either submits. I handle this with a transactional re-check inside `createBooking`: read the slot with its active bookings, fail fast if it's taken, otherwise create. If the conflict happens, the patient is bounced back to step 2 with their form data preserved and a clear message explaining what happened. SQLite's transaction semantics aren't strong enough to fully eliminate the race — see "What I'd improve" below.
 
@@ -110,9 +112,9 @@ erDiagram
 
 **Server-side validation, twice.** Zod schemas live in `lib/validations.ts` and are reused by the form (for inline errors) and the server action (as the source of truth). Even if the client is bypassed, no malformed booking can be written.
 
-**Custom UI primitives, not generic shadcn.** I wrote thin Button, Input, Label, Textarea, and StatusBadge components with a cohesive editorial look — Fraunces (display) + Geist Sans (body), warm cream + ink + forest accent palette. It signals taste without spending hours on a design system. I selectively pulled in two Radix primitives — Dialog (booking detail on desktop) and Toast (action feedback on `/admin`) — but custom-themed them to match.
+**Custom UI primitives, not generic shadcn.** Thin Button, Input, Label, Textarea, and StatusBadge components built directly on Tailwind, with an editorial palette (Fraunces for display, Geist Sans for body, warm cream/ink/forest). Faster than building a real design system from scratch, and the result looks more intentional than dropping in shadcn's defaults. Two Radix primitives — Dialog (the desktop booking detail) and Toast (admin action feedback) — are in the mix, themed to match the rest.
 
-**Scope choices: lightweight auth and email preview.** Vero's brief explicitly excluded full authentication and email sending. I built lightweight versions of both — a single shared staff password gate on `/admin` only, and an in-app email preview rendered on `/book/confirm` and inside the admin booking dialog — to demonstrate awareness of these production concerns without the engineering risk of building them fully in a 4-day window. The gate is a homemade HMAC-SHA256 signed cookie via Web Crypto so it works in middleware (no auth library, ~120 LOC); patient surfaces stay open. The email preview is a styled component, never sent. In production this would be SSO with role-based access for clinic staff, and transactional email via a service like Resend with a templated React-email layout.
+**Scope choices: lightweight auth and email preview.** Real auth and real transactional email each take a real amount of time to do well, and half-implementations of either tend to introduce more bugs than they solve. So instead: a single shared staff password on `/admin` (HMAC-SHA256 cookie signed with Web Crypto, runs in middleware, ~200 LOC, no auth library) and an inline email preview that renders the design on `/book/confirm` and inside the admin booking dialog but never actually sends. Patient routes stay open. A production version would swap the gate for SSO with per-staff roles, and the preview for Resend with templated transactional sends.
 
 ## What I'd improve with more time
 
@@ -131,36 +133,47 @@ In rough priority order:
 
 ## A note on healthcare context
 
-Clinical software has a different bar than consumer software: a wrong date on a coffee order is annoying, a wrong date on a colonoscopy is a real-world problem. I tried to reflect that in small choices throughout — explicit demo-only banner, treating reason-for-visit as PHI, distinguishing requests from confirmed bookings, modelling status as a state machine, validating server-side regardless of the client. None of this is groundbreaking; it's just being deliberate about the context.
+Healthcare apps fail differently from consumer apps. A wrong date in a calendar app is a nuisance. A wrong date on a clinic appointment cascades into missed care, frustrated patients, and reschedule overhead. The PHI reminder on the reason-for-visit field, the demo banner that doesn't go away, the request-versus-confirmation distinction, and the server-side revalidation aren't anything novel. They're the defaults I wanted in place for an app in this domain.
 
 ## Project structure
 
 ```
 patient-booking/
+├── .devcontainer/
+│   └── devcontainer.json       # One-click GitHub Codespaces setup
 ├── prisma/
-│   ├── schema.prisma     # Physician, Slot, Booking
-│   └── seed.ts           # 4 physicians, 2 weeks of slots, 3 sample bookings
+│   ├── schema.prisma           # Physician, Slot, Booking
+│   └── seed.ts                 # 4 physicians, 2 weeks of slots, 3 sample bookings
+├── scripts/
+│   ├── postinstall.mjs         # Runs prisma generate always; skips local db push + seed on Vercel/CI
+│   └── apply-turso-schema.mjs  # One-off: push the Prisma-derived SQL schema to Turso
 ├── src/
-│   ├── actions/          # Server actions (booking CRUD, physicians, sign-out)
+│   ├── actions/                # Server actions
+│   │   ├── auth.ts             # Sign-out
+│   │   ├── bookings.ts         # Read, create with slot-conflict re-check, status transitions
+│   │   └── physicians.ts
 │   ├── app/
-│   │   ├── page.tsx      # Landing
-│   │   ├── book/         # Patient flow + confirmation (with email preview)
-│   │   └── admin/        # Clinic admin (gated by middleware)
-│   │       └── login/    # Password gate
+│   │   ├── page.tsx            # Landing
+│   │   ├── layout.tsx          # Fonts + metadata
+│   │   ├── not-found.tsx
+│   │   ├── book/               # Patient flow + confirmation (with email preview)
+│   │   └── admin/              # Clinic admin (gated by middleware)
+│   │       └── login/          # Password gate
 │   ├── components/
-│   │   ├── ui/           # Button, Input, StatusBadge, Dialog, Toast
+│   │   ├── ui/                 # Button, Input, StatusBadge, Dialog, Toast, SubmitButton
 │   │   ├── booking-flow.tsx
 │   │   ├── admin-table.tsx
 │   │   ├── avatar.tsx          # Deterministic-color physician avatar
 │   │   ├── email-preview.tsx   # Confirmation email mockup
 │   │   └── demo-banner.tsx
 │   ├── lib/
-│   │   ├── db.ts         # Prisma singleton
-│   │   ├── utils.ts      # cn(), date formatters
-│   │   ├── validations.ts # Zod schemas
-│   │   └── auth.ts       # HMAC-SHA256 session sign/verify (Web Crypto)
-│   ├── middleware.ts     # /admin gate, redirects to /admin/login
-│   └── types/index.ts    # BookingStatus + state machine
+│   │   ├── db.ts               # Prisma singleton
+│   │   ├── prisma-client.ts    # Conditional adapter: local SQLite vs Turso (libSQL)
+│   │   ├── utils.ts            # cn(), date formatters
+│   │   ├── validations.ts      # Zod schemas
+│   │   └── auth.ts             # HMAC-SHA256 session sign/verify (Web Crypto)
+│   ├── middleware.ts           # /admin gate, redirects to /admin/login
+│   └── types/index.ts          # BookingStatus + state machine
 ├── tailwind.config.ts
 └── README.md
 ```

@@ -4,15 +4,24 @@ import { z } from "zod";
 export const patientDetailsSchema = z.object({
   patientName: z
     .string()
+    .trim()
     .min(2, "Name must be at least 2 characters")
     .max(100, "Name is too long"),
   patientDob: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Use the date picker")
+    // Reject calendar-invalid dates like 2020-02-30. `new Date()` silently
+    // rolls those forward (Feb 30 -> Mar 1), which would otherwise pass the
+    // not-NaN check below.
     .refine((v) => {
       const d = new Date(v);
-      return !isNaN(d.getTime()) && d < new Date();
-    }, "Date of birth must be in the past"),
+      if (isNaN(d.getTime())) return false;
+      const yyyy = d.getUTCFullYear();
+      const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+      const dd = String(d.getUTCDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}` === v;
+    }, "Enter a valid date")
+    .refine((v) => new Date(v) < new Date(), "Date of birth must be in the past"),
   patientEmail: z.string().email("Enter a valid email address"),
   patientPhone: z
     .string()
