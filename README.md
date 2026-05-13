@@ -88,6 +88,8 @@ erDiagram
     }
 ```
 
+**Notation** — `PK` (primary key, the row's unique identifier). `FK` (foreign key, points to another table's PK). `cuid` (collision-resistant unique identifier — Prisma's default ID format, a 25-character URL-safe string like `cmoyvlj2m00fpvytlnruurigu`, not a sequential integer; harder to enumerate via guessable URLs).
+
 **Indexes** — `Slot(physicianId, startTime)` for fast availability lookups; `Booking(physicianId, status)` and `Booking(slotId, status)` for the admin filters and the slot-conflict re-check inside `createBooking`.
 
 **Invariant** — a Slot can have many historical Bookings (cancelled ones), but at most one in `PENDING` or `CONFIRMED` at a time. The state machine plus the transactional re-check in `createBooking` enforce this in code; in Postgres I'd back it up with a partial unique index `ON Booking(slotId) WHERE status != 'CANCELLED'`.
