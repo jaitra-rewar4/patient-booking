@@ -25,8 +25,20 @@ export const patientDetailsSchema = z.object({
   patientEmail: z.string().email("Enter a valid email address"),
   patientPhone: z
     .string()
+    .trim()
     .min(7, "Phone number is too short")
-    .max(30, "Phone number is too long"),
+    .max(30, "Phone number is too long")
+    // Allow common phone formats: digits, spaces, dashes, parens, dots,
+    // and an optional +. Length and digit-count are enforced separately.
+    .regex(
+      /^[+\d\s().\-]+$/,
+      "Enter a valid phone number (digits, spaces, dashes, parens, optional leading +)",
+    )
+    // Even with separators, require at least 7 actual digits.
+    .refine(
+      (s) => s.replace(/\D/g, "").length >= 7,
+      "Phone number needs at least 7 digits",
+    ),
   reasonForVisit: z
     .string()
     .min(5, "Please describe the reason for your visit (5+ characters)")
