@@ -132,7 +132,7 @@ export default function HomePage() {
 
       <footer className="border-t border-stone-border bg-cream-200/30 py-6">
         <div className="mx-auto max-w-5xl px-6 text-[13px] text-stone-muted">
-          A take-home project · {new Date().getFullYear()}
+          Apex Health Demo · {new Date().getFullYear()}
         </div>
       </footer>
     </>
