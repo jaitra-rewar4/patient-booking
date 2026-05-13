@@ -14,7 +14,7 @@ Click the **Open in GitHub Codespaces** badge above. GitHub spins up a Linux VM 
 
 ### Run locally
 
-Requires Node.js 20+.
+Works on macOS, Linux, and Windows. The only prerequisite is Node.js 20+.
 
 ```bash
 npm install
